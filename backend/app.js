@@ -1,70 +1,34 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const path = require('path');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+require('dotenv').config({ path: process.cwd() + '/.env' });
 
-
-// Déclaration des routes
 const sauceRoutes = require('./routes/sauce');
 const userRoutes = require('./routes/user');
 
-// Connexions à mongoDB
-mongoose.connect('mongodb+srv://sovu1:12345@dbtest.kzse8.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
-    {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    })
-    .then(() => console.log('Connexion à MongoDB réussie !'))
-    .catch(() => console.log('Connexion à MongoDB échouée !'));
+// Connexion à la base de données avec mongoose
+mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}?retryWrites=true&w=majority`,
+  { useNewUrlParser: true,
+    useUnifiedTopology: true })
+  .then(() => console.log('Connexion à MongoDB réussie !'))
+  .catch(() => console.log('Connexion à MongoDB échouée !'));
 
-
-
-    
-
-// Lancement de express
 const app = express();
 
-
-
-
-
-
-
-
-// Headers CORS
+// Définition de headers pour éviters les erreurs de CORS
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', process.env.AUTHORIZED_ORIGIN);
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
     next();
-});
+  });
 
+app.use(bodyParser.json());
 
-
-
-
-// Conversion en JSON
-app.use(express.json());
-
-
-
-
-
-
-
-
-
-
-
-
-// Lancement des routes
+// Enregistrement des routeurs
+app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/api/sauces', sauceRoutes);
 app.use('/api/auth', userRoutes);
-
-
-
-
 
 module.exports = app;

@@ -2,19 +2,27 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const path = require('path');
-//require('dotenv').config({ path: process.cwd() + '.env' });
+//utilise pour faire venir connexion DB
+require('dotenv').config()
+
 
 const sauceRoutes = require('./routes/sauce');
 const userRoutes = require('./routes/user');
 
-// Connexion à la base de données avec mongoose
-mongoose.connect('mongodb+srv://sovu1:12345@dbtest.kzse8.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  })
+//------------------------------------------
+
+mongoose.connect('mongodb+srv://' + process.env.DB_USER + ':' + process.env.DB_PASSWORD + '@' + process.env.DB_HOST + '.kzse8.mongodb.net/' + process.env.DB_NAME + '?retryWrites=true&w=majority',
+  { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
+
+//------------------------------------------
+
+
+
+
+
+
 
 const app = express();
 
@@ -33,4 +41,7 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/api/sauces', sauceRoutes);
 app.use('/api/auth', userRoutes);
 
+
+
+//exportation de tout ce fichier pour etre importer ailleurs
 module.exports = app;
